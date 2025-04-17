@@ -15,7 +15,7 @@ app.use(express.json());
 app.get('/api/profile', profileController);
 app.get('/api/greet', greetController);
 app.post('/api/blog-post', blogController);
-app.get('/api/blog-posts', blogListController);
+app.get('/api/blog-list', blogListController);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the backend API 🚀');
