@@ -1,35 +1,41 @@
 /*
-What is a .gitignore file?
-- A .gitignore file tells Git which files or directories to ignore in a project
-- It prevents specified files from being tracked by Git and uploaded to your repository
+Using Database Connections in API Controllers
 
-Why is .gitignore essential for security and project management?
+Now that we have our database connection set up in db.js, we can use it in our controllers.
+Here's the typical structure for a controller that uses the database:*/
+// 1. Import the pool from db.js
+import pool from '../db.js';  // Adjust the path as needed based on your file structure
 
-1. Security Protection
-   - Prevents sensitive data like .env files, API keys, and credentials from being exposed publicly
-   - Protects private configuration that shouldn't be shared between different environments
+// 2. Create controller functions that use the pool for database operations
+export const getProducts = async (req, res) => {
+  try {
+    // Use the pool to run SQL queries
+    const result = await pool.query('SELECT * FROM products');
+    
+    // Return the query results as JSON
+    res.json(result.rows);
+  } catch (error) {
+    // Handle any errors that occur
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+};
 
-2. Repository Optimization
-   - Excludes large files that don't need version control (build artifacts, dependencies)
-   - Keeps your repository clean and focused on source code
-   - Prevents node_modules and other large directories from being committed
+// 3. Use this controller function in your routes
+// In your server.js or routes file:
+// import { getProducts } from './controllers/productController.js';
+// app.get('/api/products', getProducts);
 
-3. System-Specific Files
-   - Excludes operating system files (.DS_Store on Mac, Thumbs.db on Windows)
-   - Removes IDE and editor-specific files (.vscode, .idea directories)
+/*Key Points to Remember:
 
-Common patterns in .gitignore files:
-.env                  # Ignore all .env files
-node_modules/        # Ignore the node_modules directory
-*.log                # Ignore all log files
-dist/                # Ignore build output directories
-.DS_Store            # Ignore macOS specific files
+1. Always use parameterized queries ($1, $2, etc.) instead of string concatenation
+   to prevent SQL injection attacks
 
-When working with sensitive information:
-1. ALWAYS add .env to your .gitignore file BEFORE creating your .env file
-2. NEVER remove .env from .gitignore to commit "just this once"
-3. Consider using .env.example files to document required variables without values
+2. Wrap your database operations in try/catch blocks to handle errors properly
 
-Remember: Once a file has been committed to a repository, simply adding it
-to .gitignore won't remove it from the repository's history!
-*/
+3. Use async/await for cleaner code when working with database queries
+
+4. Return appropriate HTTP status codes (200 for success, 404 for not found, 
+   500 for server errors, etc.)
+
+*/```
