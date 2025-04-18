@@ -7,5 +7,6 @@ const greetUser = (req, res) => {
   }
 };
 
-module.exports = greetUser;
+export default greetUser;
+
   
