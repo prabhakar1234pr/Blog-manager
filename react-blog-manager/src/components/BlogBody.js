@@ -9,6 +9,7 @@ function BlogBody() {
   const email = localStorage.getItem('userEmail');
   const userName = localStorage.getItem('userName');
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   // Fetch existing blog posts when component mounts or when email changes
   useEffect(() => {
@@ -20,7 +21,7 @@ function BlogBody() {
   async function fetchBlogPosts() {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5001/api/blog-list', {
+      const response = await fetch(`${API_BASE_URL}/api/blog-list`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +59,7 @@ function BlogBody() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:5001/api/blogs/${postId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/blogs/${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'

@@ -11,6 +11,7 @@ function Profile() {
   // Get user data from localStorage
   const email = localStorage.getItem('userEmail');
   const name = localStorage.getItem('userName');
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -22,7 +23,7 @@ function Profile() {
       }
 
       try {
-        const response = await fetch(`http://localhost:5001/api/profile/${encodeURIComponent(email)}`, {
+        const response = await fetch(`${API_BASE_URL}/api/profile/${encodeURIComponent(email)}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',

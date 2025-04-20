@@ -10,6 +10,7 @@ function CreatePost() {
   const email = localStorage.getItem('userEmail');
   const userName = localStorage.getItem('userName');
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   // Debug log when component mounts
   useEffect(() => {
@@ -61,7 +62,7 @@ function CreatePost() {
       console.log('Sending request with data:', postData);
       console.log('Stringified data:', JSON.stringify(postData));
       
-      const response = await fetch('http://localhost:5001/api/blogs', {
+      const response = await fetch(`${API_BASE_URL}/api/blogs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
