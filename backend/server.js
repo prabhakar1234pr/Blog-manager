@@ -12,6 +12,7 @@ dotenv.config();
 const db = pool.default || pool;
 
 const app = express();
+// Use Vercel's PORT in production or default to 5001 for local development
 const port = process.env.PORT || 5001;
 
 // Middleware
@@ -74,8 +75,19 @@ app.get('/api/greet', greetController);
 app.post('/api/blogs', createBlogPost);
 app.post('/api/blog-list', getBlogPosts);
 
+// Health check endpoint for Vercel
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'API is running' });
+});
+
 app.get('/', (req, res) => {
-  res.send('Welcome to the backend API 🚀');
+  res.send('Welcome to the Blog Manager API 🚀');
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
 });
 
 app.listen(port, () => {
