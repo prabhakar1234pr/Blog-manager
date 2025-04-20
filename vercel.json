@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "framework": "create-react-app",
   "builds": [
     {
       "src": "backend/server.js",
@@ -8,17 +9,26 @@
     {
       "src": "react-blog-manager/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
+      "config": { 
+        "distDir": "build",
+        "framework": "create-react-app"
+      }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/server.js"
+      "dest": "/backend/server.js"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "react-blog-manager/$1"
+      "dest": "/react-blog-manager/index.html"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 } 
