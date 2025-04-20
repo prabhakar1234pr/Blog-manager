@@ -1,0 +1,83 @@
+.profile-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.profile-container h2 {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-field {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-field:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.profile-field label {
+  font-weight: 600;
+  color: #34495e;
+  width: 120px;
+  margin-right: 1rem;
+}
+
+.profile-field span {
+  color: #2c3e50;
+  flex: 1;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: #3498db;
+  font-size: 1.1rem;
+  padding: 2rem;
+}
+
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #e74c3c;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.error-message p {
+  margin: 0.5rem 0;
+}
+
+.error-message p:last-child {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.profile-container p:not(.error-message) {
+  text-align: center;
+  color: #666;
+  animation: pulse 1.5s infinite;
+} 

@@ -1,25 +1,31 @@
-import React from "react";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
-import { Link } from 'react-router-dom';
-import About from "./About";
 
-function Header(){
-    return(
-        <header>
-            <h1>My Awesome Blog Portal</h1>
-            <button className = "Headerbutton"onClick={() => alert('Hello!')}>Click Me</button>
+const Header = () => {
+    const navigate = useNavigate();
 
-            <nav>
-                <ul>
-                    <li><Link to='/'>Home</Link> </li>
-                    <li><Link to ="/about">About</Link> </li>
-                    <li><Link to ="/contact">contact</Link> </li>
-                    <li><Link to='/profile'>Profile</Link> </li>
-                    <li><Link to='/blog-posts'>Blog Posts</Link> </li>
-                </ul>
-            </nav>
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/');
+    };
+
+    return (
+        <header className="main-header">
+            <div className="header-content">
+                <h1>Blog Manager</h1>
+                <nav className="header-nav">
+                    <Link to="/blogposts" className="nav-link">Blog Posts</Link>
+                    <Link to="/profile" className="nav-link">Profile</Link>
+                    <Link to="/create" className="nav-link">Create Post</Link>
+                    <Link to="/about" className="nav-link">About</Link>
+                    <button onClick={handleLogout} className="header-button header-button-logout">
+                        Logout
+                    </button>
+                </nav>
+            </div>
         </header>
-    )
-}
+    );
+};
 
 export default Header;

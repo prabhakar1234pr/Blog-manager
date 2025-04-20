@@ -1,0 +1,94 @@
+.email-form-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.email-form-container h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+.email-form-container p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #34495e;
+  font-weight: 500;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-field input:focus {
+  border-color: #2196f3;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #e74c3c;
+  padding: 0.75rem;
+  border-radius: 4px;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.email-form-container button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.email-form-container button:hover:not(:disabled) {
+  background-color: #1976d2;
+}
+
+.email-form-container button:disabled {
+  background-color: #90caf9;
+  cursor: not-allowed;
+}
+
+/* Center the form vertically on larger screens */
+@media (min-height: 600px) {
+  .email-form-container {
+    margin: 10vh auto;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .email-form-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+} 

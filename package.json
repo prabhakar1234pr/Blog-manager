@@ -1,4 +1,21 @@
 {
+  "name": "blog-manager",
+  "version": "1.0.0",
+  "description": "A full-stack blog management application",
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd react-blog-manager && npm install",
+    "postinstall": "npm run install-backend && npm run install-frontend",
+    "start-backend": "cd backend && npm start",
+    "start-frontend": "cd react-blog-manager && npm start",
+    "build": "cd react-blog-manager && npm run build",
+    "start": "npm run start-backend"
+  },
+  "author": "Elavala Prabhakar",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "cors": "^2.8.5"
   }

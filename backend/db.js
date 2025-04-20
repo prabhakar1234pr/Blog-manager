@@ -1,24 +1,13 @@
-import pkg from 'pg';
-const {Pool} = pkg;
-import dotenv from 'dotenv'
-
+import pg from 'pg';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-const pool = new Pool({
+const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized : false
+        rejectUnauthorized: false
     }
 });
 
-pool.connect((err,client,release)=>{
-    if(err){
-        return console.error('Error acquiring client',err.stack);
-    }
-    console.log('Connected to database successfully');
-    release();
-});
-
-export default pool;
-
+export default pool; 

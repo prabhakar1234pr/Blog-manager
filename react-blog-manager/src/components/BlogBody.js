@@ -1,235 +1,133 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "./BlogBody.css";
-import EmailForm from './EmailForm.js';
 
 function BlogBody() {
   const [statusMessage, setStatusMessage] = useState('');
-  const [title, setTitle] = useState('');
   const [posts, setPosts] = useState([]);
-  const [body, setBody] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [email, setEmail] = useState('');
-  const [showBlogInterface, setShowBlogInterface] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
-  const [userBlogs, setUserBlogs] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const email = localStorage.getItem('userEmail');
+  const userName = localStorage.getItem('userName');
+  const navigate = useNavigate();
 
-  function handleDeletePost(indexToRemove) {
-    const confirmed = window.confirm("Are you sure you want to delete this post?");
-    if (!confirmed) return;
-    const updatedPosts = posts.filter((_, index) => index !== indexToRemove);
-    setPosts(updatedPosts);
-  }
-
-  const handleAccessBlogs = (email, blogList, profileData) => {
-    setEmail(email);
-    setUserBlogs(blogList);
-    setUserProfile(profileData);
-    setShowBlogInterface(true);
-
-    if (blogList && Array.isArray(blogList.posts)) {
-      setPosts(blogList.posts);
-    } else if (Array.isArray(blogList)) {
-      setPosts(blogList);
-    } else {
-      setPosts([]);
+  // Fetch existing blog posts when component mounts or when email changes
+  useEffect(() => {
+    if (email) {
+      fetchBlogPosts();
     }
-  };
+  }, [email]);
 
-  function handleTitleChange(event) {
-    setTitle(event.target.value);
-  }
-
-  function handleBodyChange(event) {
-    setBody(event.target.value);
-  }
-
-  async function handlePost() {
-    if (title.trim() === '') {
-      alert('Please enter a title');
-      return;
-    }
-
-    if (body.trim() === '') {
-      alert('Please enter the body');
-      return;
-    }
-
-    const newPost = {
-      title,
-      body,
-      date: date || new Date().toLocaleDateString(),
-      time: time || new Date().toLocaleTimeString()
-    };
-
+  async function fetchBlogPosts() {
+    setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/blogs', {
+      const response = await fetch('http://localhost:5001/api/blog-list', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          title: newPost.title,
-          body: newPost.body,
-          email: email
-        }),
+        body: JSON.stringify({ email })
       });
 
-      const data = await response.json();
-
-      if (response.ok && (data.success || data.blog)) {
-        setStatusMessage(`✅ Blog "${newPost.title}" saved!`);
-        setPosts([
-          ...posts,
-          {
-            title: data.blog?.title || newPost.title,
-            body: data.blog?.content || newPost.body,
-            date: new Date(data.blog?.created_at || Date.now()).toLocaleDateString(),
-            time: new Date(data.blog?.created_at || Date.now()).toLocaleTimeString()
-          }
-        ]);
-      } else {
-        setStatusMessage('⚠️ Blog post failed to save.');
+      if (!response.ok) {
+        throw new Error('Failed to fetch blog posts');
       }
 
-      setTitle('');
-      setBody('');
-      setDate('');
-      setTime('');
+      const data = await response.json();
+      
+      if (data.rows) {
+        setPosts(data.rows.map(post => ({
+          id: post.id,
+          title: post.title,
+          body: post.content,
+          createdAt: new Date(post.created_at),
+          date: new Date(post.created_at).toLocaleDateString(),
+          time: new Date(post.created_at).toLocaleTimeString()
+        })));
+      }
     } catch (error) {
-      console.error('Error posting blog:', error);
-      setStatusMessage('❌ Error communicating with backend.');
+      console.error('Error fetching blog posts:', error);
+      setStatusMessage('❌ Error loading blog posts. Please try again.');
     } finally {
-      setTimeout(() => setStatusMessage(''), 5000);
+      setIsLoading(false);
+    }
+  }
+
+  async function handleDeletePost(postId) {
+    const confirmed = window.confirm("Are you sure you want to delete this post?");
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/blogs/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete post');
+      }
+
+      await fetchBlogPosts(); // Refresh the posts list
+      setStatusMessage('✅ Post deleted successfully!');
+      setTimeout(() => setStatusMessage(''), 3000);
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      setStatusMessage('❌ Failed to delete post. Please try again.');
     }
   }
 
   return (
-    <main>
-      {!showBlogInterface ? (
-        <EmailForm headerText="Welcome to Blog Manager" onAccessBlogs={handleAccessBlogs} />
-      ) : (
-        <div>
-          {/* User Profile Section */}
-          {userProfile && (
-            <section className='user-profile-section'>
-              <div className='user-profile-info'>
-                <h3>Welcome, {userProfile.user}!</h3>
-                <p>Email: {email}</p>
-              </div>
-            </section>
-          )}
-
-          {/* Blog Creation Section */}
-          <section className='blog-creation-section'>
-            <div className='blog-creation-form'>
-              <h2>Create a New Blog Post</h2>
-              <p className='status-message'>{statusMessage}</p>
-
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handlePost();
-              }}>
-                <div className='form-group'>
-                  <label>
-                    Title:
-                    <input
-                      type="text"
-                      name="title"
-                      value={title}
-                      onChange={handleTitleChange}
-                      placeholder="Title of my awesome post"
-                    />
-                  </label>
-                  <br /><br />
-                </div>
-
-                <p>This information is Confidential.</p>
-                <br /><br />
-
-                <div className='form-group'>
-                  <label>
-                    Body:
-                    <textarea
-                      name="body"
-                      value={body}
-                      onChange={handleBodyChange}
-                      placeholder="Write your blog content here..."
-                      className='body-input'
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                          e.preventDefault();
-                          handlePost();
-                        }
-                      }}
-                    ></textarea>
-                  </label>
-                  <br /><br />
-                </div>
-
-                <div className='form-group date-time-group'>
-                  <div className='date-input-container'>
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className='date-input'
-                    />
-                  </div>
-                  <div className='time-input-container'>
-                    <input
-                      type="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      className='time-input'
-                    />
-                  </div>
-                </div>
-
-                <div className="form-actions">
-                  <button className="post-button" type="submit">Post</button>
-                </div>
-              </form>
-            </div>
-          </section>
-
-          {/* Published Blog Posts Section */}
-          <section className='published-posts-section'>
-            <h2>Published Blog Posts</h2>
-            <div className='blog-posts-container'>
-              <h3>Posted Titles:</h3>
-              {posts.length === 0 ? (
-                <p className="no-posts">No posts yet. Start typing!</p>
-              ) : (
-                posts.map((post, index) => (
-                  <div key={index} className='blog-post'>
-                    <div className='post-header'>
-                      <h3 className='post-title'>{post.title}</h3>
-                    </div>
-                    <div className='post-content'>
-                      <p className='post-body'>{post.body}</p>
-                    </div>
-                    <div className='post-meta'>
-                      {post.date && <span className='post-date'>{post.date}</span>}
-                      {post.time && <span className='post-time'>{post.time}</span>}
-                      <span className='post-timestamp'>Posted at {post.date} : {post.time}</span>
-                    </div>
-                    <div className='post-actions'>
-                      <button className='delete-button' onClick={() => {
-                        if (window.confirm("Are you sure?")) {
-                          handleDeletePost(index);
-                        }
-                      }}>
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+    <main className="blog-body-container">
+      {/* Published Blog Posts Section */}
+      <section className='published-posts-section'>
+        <div className="section-header">
+          <h2>Your Blog Posts</h2>
+          <button 
+            className="create-post-button"
+            onClick={() => navigate('/create')}
+          >
+            Create New Post
+          </button>
         </div>
-      )}
+        {statusMessage && (
+          <p className='status-message'>{statusMessage}</p>
+        )}
+        <div className='blog-posts-container'>
+          {isLoading ? (
+            <p className="loading-message">Loading your blog posts...</p>
+          ) : posts.length === 0 ? (
+            <div className="no-posts">
+              <p>No posts yet. Start writing your first blog post!</p>
+              <button 
+                className="create-first-post-button"
+                onClick={() => navigate('/create')}
+              >
+                Create Your First Post
+              </button>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className='blog-post'>
+                <div className='post-header'>
+                  <h3 className='post-title'>{post.title}</h3>
+                  <button
+                    className='delete-button'
+                    onClick={() => handleDeletePost(post.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+                <p className='post-body'>{post.body}</p>
+                <div className='post-footer'>
+                  <span className='post-date'>Posted on {post.date} at {post.time}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
     </main>
   );
 }
