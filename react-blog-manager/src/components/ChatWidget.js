@@ -8,12 +8,11 @@ const ChatWidget = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Langflow API details
-  const LANGFLOW_API_URL = 'http://127.0.0.1:7860/api/v1/run/72303bc9-05f4-4df6-87d2-235eced25180?stream=false';
-  const LANGFLOW_API_KEY = 'sk-i8pOatkqGzymV0So3tJ3uQQ64ljFe9yBUmKdN2nPEB8';
-  // You'll need to replace this with your actual auth token if required
-  const LANGFLOW_AUTH_TOKEN = '<TOKEN>';
-
+  // Astra DataStax Langflow API configuration
+  const API_URL = 'https://api.langflow.astra.datastax.com/lf/664e2890-0079-4091-88d4-68d3da05aa38/api/v1/run/fcd9e235-d213-41f1-b1da-f8536bd3872b';
+  // Replace with your actual token
+  const API_TOKEN = '<YOUR_APPLICATION_TOKEN>';
+  
   // Scroll to bottom of messages
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -23,31 +22,6 @@ const ChatWidget = () => {
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
-  };
-
-  // Helper function to safely extract text from potentially complex message objects
-  const extractTextFromMessage = (messageObj) => {
-    if (typeof messageObj === 'string') return messageObj;
-    
-    // If it's an object with a text property
-    if (messageObj && typeof messageObj === 'object') {
-      if (typeof messageObj.text === 'string') return messageObj.text;
-      if (typeof messageObj.message === 'string') return messageObj.message;
-      
-      // Specific structure we've seen in the error
-      if (messageObj.data && typeof messageObj.data.text === 'string') {
-        return messageObj.data.text;
-      }
-    }
-    
-    // Last resort, try to stringify if possible or return default message
-    try {
-      return typeof messageObj === 'object' 
-        ? JSON.stringify(messageObj) 
-        : "Sorry, I couldn't process that request.";
-    } catch (e) {
-      return "Sorry, I couldn't process that request.";
-    }
   };
 
   const sendMessage = async (e) => {
@@ -61,73 +35,36 @@ const ChatWidget = () => {
     setIsLoading(true);
 
     try {
-      // Use Langflow API with the exact format provided
-      const response = await fetch(LANGFLOW_API_URL, {
+      const payload = {
+        "input_value": inputValue,
+        "output_type": "chat",
+        "input_type": "chat",
+        "session_id": "user_1" // You can generate unique session IDs for each user
+      };
+
+      const options = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': LANGFLOW_API_KEY
+          'Authorization': `Bearer ${API_TOKEN}`
         },
-        body: JSON.stringify({
-          input_value: userMessage.text,
-          output_type: "chat",
-          input_type: "chat",
-          tweaks: {
-            "ChatInput-xhLar": {},
-            "Agent-UtSYh": {},
-            "ChatOutput-dc8KG": {},
-            "PythonREPLComponent-nMGPz": {}
-          }
-        })
-      });
+        body: JSON.stringify(payload)
+      };
 
+      const response = await fetch(API_URL, options);
       const data = await response.json();
-      console.log('Full response:', JSON.stringify(data));
+      console.log('API response:', data);
       
-      // Extract response from the correct path in the complex response structure
-      let responseMessage = null;
-      
-      if (data && data.outputs && Array.isArray(data.outputs) && data.outputs.length > 0) {
-        const output = data.outputs[0];
-        console.log('Output[0]:', JSON.stringify(output));
-        
-        // Try all possible paths where the message might be
-        if (output.messages && Array.isArray(output.messages) && output.messages.length > 0) {
-          console.log('Messages path exists:', output.messages[0]);
-          responseMessage = output.messages[0].message;
-        }
-        else if (output.results && output.results.message) {
-          console.log('Results.message path exists');
-          responseMessage = output.results.message;
-        }
-        else if (output.artifacts && output.artifacts.message) {
-          console.log('Artifacts.message path exists');
-          responseMessage = output.artifacts.message;
-        }
-        else {
-          // Last resort: try to find any text or message field at any level
-          console.log('Trying to find message in any field');
-          const findMessage = (obj) => {
-            if (!obj || typeof obj !== 'object') return null;
-            
-            if (obj.text) return obj.text;
-            if (obj.message) return obj.message;
-            
-            for (const key in obj) {
-              const result = findMessage(obj[key]);
-              if (result) return result;
-            }
-            
-            return null;
-          };
-          
-          responseMessage = findMessage(output);
-        }
+      // Extract the response text from the API response
+      // Adjust this according to actual response structure
+      let responseText = "";
+      if (data && data.data && data.data.result) {
+        responseText = data.data.result;
+      } else if (data && data.result) {
+        responseText = data.result;
+      } else {
+        responseText = "Sorry, I couldn't understand the response from the server.";
       }
-      
-      // Make sure we extract just the text string to avoid rendering objects
-      const responseText = extractTextFromMessage(responseMessage);
-      console.log('Final response text:', responseText);
       
       // Add AI response to chat
       const aiMessage = { 
@@ -136,7 +73,7 @@ const ChatWidget = () => {
       };
       setMessages(prevMessages => [...prevMessages, aiMessage]);
     } catch (error) {
-      console.error('Error communicating with Langflow:', error);
+      console.error('Error communicating with API:', error);
       // Add error message
       const errorMessage = { 
         text: "Sorry, I encountered an error. Please try again.", 
