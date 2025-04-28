@@ -11,6 +11,7 @@ import Contact from './components/Contact';
 import Profile from './components/Profile';
 import BlogPosts from './components/BlogPosts';
 import CreatePost from './components/CreatePost';
+import ChatWidget from './components/ChatWidget';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -26,6 +27,7 @@ const ProtectedLayout = ({ children }) => (
       {children}
     </div>
     <Footer />
+    <ChatWidget />
   </div>
 );
 
